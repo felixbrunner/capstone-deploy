@@ -57,7 +57,7 @@ app = Flask(__name__)
 
 # SHOULD_SEARCH ENDPOINT
 
-@app.route('/should_search', methods=['POST'])
+@app.route('/should_search/', methods=['POST'])
 def predict():
     """
     Produce authorisation permits for request
@@ -255,7 +255,7 @@ def predict():
 
 # SEARCH_RESULT ENDPOINT
 
-@app.route('/search_result', methods=['POST'])
+@app.route('/search_result/', methods=['POST'])
 def update():
     raw = request.get_json()
     try:
