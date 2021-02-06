@@ -44,8 +44,8 @@ DB = connect(os.environ.get('DATABASE_URL') or 'sqlite:///predictions.db')
 class Prediction(Model):
     observation_id = TextField(unique=True)
     request = TextField()
-    predicted_outcome = IntegerField(null=True)
-    true_outcome = IntegerField(null=True)
+    predicted_outcome = BooleanField(null=False)
+    true_outcome = BooleanField(null=True)
 
     class Meta:
         database = DB
@@ -233,11 +233,7 @@ def predict():
     X = pd.DataFrame([[req[key] for key in keys]], index=[req['observation_id']], columns=columns).astype(dtypes)
     
     # create output
-    authorisation = src.evaluate.authorise_search(pipeline, X)[0]
-    if authorisation:
-        predicted_outcome = 'true'
-    else:
-        predicted_outcome = 'false'
+    predicted_outcome = src.evaluate.authorise_search(pipeline, X)[0]
     response = {'outcome': predicted_outcome}
 
     # store
