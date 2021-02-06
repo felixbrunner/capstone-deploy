@@ -150,13 +150,13 @@ def predict():
     
     # check 'Latitude' data
     lat = req['Latitude']
-    if not 48 <= lat < 59 and lat == lat:
+    if not lat == lat or not 48 <= lat < 59:
         response = {'error': 'Invalid value provided for "Latitude": {}. Needs to be in [48, 59) or NaN.'.format(lat)}
         return jsonify(response)
     
     # check 'Longitude' data
     long = req['Longitude']
-    if not -10 <= long < 3 and long == long:
+    if not long == long or not -10 <= long < 3:
         response = {'error': 'Invalid value provided for "Longitude": {}. Needs to be in [-10, 3) or NaN.'.format(lat)}
         return jsonify(response)
     
