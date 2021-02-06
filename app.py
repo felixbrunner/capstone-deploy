@@ -234,12 +234,12 @@ def predict():
     
     # create output
     predicted_outcome = src.evaluate.authorise_search(pipeline, X)[0]
-    response = {'outcome': predicted_outcome}
+    response = {'outcome': bool(predicted_outcome)}
 
     # store
     p = Prediction(
         observation_id=req['observation_id'],
-        predicted_outcome=predicted_outcome,
+        predicted_outcome=bool(predicted_outcome),
         request=req,
         )
     try:
