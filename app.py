@@ -129,7 +129,6 @@ def predict():
                          'Object of search',
                          'station'}
     actual_columns = set(req.keys())
-    
     if not necessary_columns.issubset(actual_columns):
         missing_columns = necessary_columns - actual_columns
         response = {'error': 'Missing columns: {}'.format(missing_columns)}
@@ -182,9 +181,9 @@ def predict():
         return jsonify(response)
     
     # check 'Part of a policing operation' data
-    valid_op = [True, False]
+    valid_op = [True, False, None]
     op = req['Part of a policing operation']
-    if op not in valid_op and op == op:
+    if op not in valid_op:# and op is not None:
         response = {'error': 'Invalid value provided for "Part of a policing operation": {}. Needs to be True/False or NaN.'.format(op, valid_op)}
         return jsonify(response)
     
@@ -202,8 +201,8 @@ def predict():
     
     # check 'Object of search' data
     obj = req['Object of search']
-    if not type(obj) == str:
-        response = {'error': 'Invalid value provided for "Object of search": {}. Needs to be a string.'.format(obj)}
+    if not type(obj) == str and not obj is None:
+        response = {'error': 'Invalid value provided for "Object of search": {}. Needs to be a string or NaN.'.format(obj)}
         return jsonify(response)
     
     # check 'station' data
@@ -233,13 +232,13 @@ def predict():
     X = pd.DataFrame([[req[key] for key in keys]], index=[req['observation_id']], columns=columns).astype(dtypes)
     
     # create output
-    predicted_outcome = src.evaluate.authorise_search(pipeline, X)[0]
-    response = {'outcome': bool(predicted_outcome)}
+    predicted_outcome = bool(src.evaluate.authorise_search(pipeline, X)[0])
+    response = {'outcome': predicted_outcome}
 
     # store
     p = Prediction(
         observation_id=req['observation_id'],
-        predicted_outcome=bool(predicted_outcome),
+        predicted_outcome=predicted_outcome,
         request=req,
         )
     try:
@@ -247,7 +246,7 @@ def predict():
     except IntegrityError:
         error_msg = "ERROR: Observation ID: '{}' already exists".format(req['observation_id'])
         response["error"] = error_msg
-        # print(error_msg)
+        print(error_msg)
         DB.rollback()
 
     return jsonify(response)
