@@ -5,11 +5,26 @@ from sklearn.metrics import precision_score
 
 ### FUNCTIONS ###
 
-def authorise_search(pipeline, X):
+# def authorise_search_old(pipeline, X):
+#     '''Authorises a search whenever there is a probability
+#     greater than 10% that the search will be successful.
+#     '''
+#     authorise = pipeline.predict_proba(X)[:,1] > 0.1
+#     return authorise
+
+def authorise_search(pipeline, X, bias_correction=True):
     '''Authorises a search whenever there is a probability
     greater than 10% that the search will be successful.
     '''
-    authorise = pipeline.predict_proba(X)[:,1] > 0.1
+    model_probas = pipeline.predict_proba(X)[:,1]
+    if bias_correction:
+        group_mean = pd.DataFrame({'ethnicity': X['ethnicity_officer'].values,
+                                   'sex': X['sex'].values,
+                                   'station': X['station'].values,
+                                   'proba': model_probas})\
+                        .groupby(['ethnicity', 'sex']).transform('mean')
+        model_probas -= (group_mean.values.squeeze() - model_probas.mean())
+    authorise = model_probas > 0.1
     return authorise
 
 def min_max_range(data):
